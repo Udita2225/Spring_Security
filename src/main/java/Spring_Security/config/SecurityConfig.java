@@ -44,8 +44,8 @@ public class SecurityConfig {
                         .anyRequest()
                         .authenticated()
                 );
-        http
-                .sessionManagement((session)->
+
+        http.sessionManagement((session)->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
         http.headers(headers ->
