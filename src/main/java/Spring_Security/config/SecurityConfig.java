@@ -38,16 +38,27 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+//  This object is used to build connection with the database
+//  It takes the information form application.properties
     @Autowired
     DataSource dataSource;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
+//    We cannot autowire AuthTokenFilter here because this class needs an objects of UserDetailsService which is defined in the same SecurityConfigFile .
+//    This will cause circular dependency AuthTokenFilter depends on -> UserDetailsService in SecurityConfig File
+//    SecurityConfig depends on AuthTokeFilter
+
+
+//    @Autowired
+//    private AuthTokenFilter authenticationJwtTokenFilter;
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter(){
         return new AuthTokenFilter();
     }
+
 
     @Bean
     @Order(SecurityFilterProperties.BASIC_AUTH_ORDER)
@@ -91,12 +102,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-//   We have to use CommandLineRunner so that database will be created the moment the application gets loaded
+//  The object of this interface is used in AuthTokenFilter.java
     @Bean
     public UserDetailsService userDetailsService(DataSource dataSource){
         return new JdbcUserDetailsManager(dataSource);
     }
 
+
+    //   We have to use CommandLineRunner so that database will be created the moment the application gets loaded
     @Bean
     public CommandLineRunner initData(UserDetailsService userDetailsService){
         return args ->{
@@ -110,9 +123,11 @@ public class SecurityConfig {
                   .roles("ADMIN")
                   .build();
 
-          JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-          userDetailsManager.createUser(user1);
-          userDetailsManager.createUser(admin);
+//          JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
+//          userDetailsManager.createUser(user1);
+//          userDetailsManager.createUser(admin);
+            manager.createUser(user1);
+            manager.createUser(admin);
         };
     }
 
